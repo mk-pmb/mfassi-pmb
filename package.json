@@ -1,0 +1,21 @@
+{ "name": "mfassi-pmb",
+  "version": "0.0.1",
+  "description": "Multi Factor (Login) Assistant. Not meant as a security tool!",
+  "keywords": [],
+
+  "author": "M.K. (https://github.com/mk-pmb)",
+  "homepage": "https://github.com/mk-pmb/mfassi-pmb/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mk-pmb/mfassi-pmb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mk-pmb/mfassi-pmb/issues"
+  },
+  "contributors": [],
+
+  "private": true, "license": "ISC",
+
+
+  "engines": { "bash": ">=4.0.0" }
+}
