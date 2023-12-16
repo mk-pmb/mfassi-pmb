@@ -59,6 +59,12 @@ function mfassi_pwfile_preparse_keytabval () {
     ') | sed -rf <(echo '
     s~[A-Z]+~\L&\E~g
     s~ ~_~g
+    s~^(totp_)secret$~\1key~
+    s~^pass$~pswd~
+    s~^password$~pswd~
+    s~^pw$~pswd~
+    s~^(user)_?name$~\1~
+    s~^un$~user~
     n
     ') | sed -re 'N;s~\n~\t~'
 }
