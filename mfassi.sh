@@ -13,7 +13,10 @@ function mfassi_cli_init () {
 }
 
 
-function source_in_func () { source -- "$@"; }
+function source_in_func () {
+  source -- "$@" || return $?$(
+    echo "W: $FUNCNAME failed (rv=$?) for '$1'" >&2)
+}
 
 
 function source_these_libs () {
@@ -21,6 +24,20 @@ function source_these_libs () {
   for LIB in "$@"; do
     source_in_func "$LIB" --lib || return $?
   done
+}
+
+
+function mfassi_rc () {
+  local ARG="$1"; shift
+  source_in_func "$ARG" || return $?
+  mfassi_"$@" || return $?
+}
+
+
+function mfassi_eval () {
+  local ARG="$1"; shift
+  eval "$ARG" || return $?
+  mfassi_"$@" || return $?
 }
 
 
