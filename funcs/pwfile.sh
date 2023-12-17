@@ -33,7 +33,9 @@ function mfassi_pwfile () {
 
   LOGIN=()
   if [ -z "$NEXT_TASK" ]; then echo "$SRC_TEXT"; return 0; fi
-  eval "LOGIN=( $(mfassi_keytabval_to_bash_dict <<<"$SRC_TEXT") )"
+  local SRC_TEXT="$( mfassi_keytabval_to_bash_dict <<<"$SRC_TEXT" )"
+  if [ "$NEXT_TASK" == --bash-dict ]; then echo "$1$SRC_TEXT$2"; return 0; fi
+  eval "LOGIN=( $SRC_TEXT )"
   mfassi_"$NEXT_TASK" "$@"; return $?
 }
 
