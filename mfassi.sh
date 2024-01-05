@@ -13,6 +13,9 @@ function mfassi_cli_init () {
     [gxotp_type_cooldown]='1s' # how to wait after faking input
     )
   local -A LOGIN=()
+  case "$1" in
+    '#!'* ) mfassi_invoked_from_shebang "$@"; return $?;;
+  esac
   mfassi_"$@" || return $?
 }
 
