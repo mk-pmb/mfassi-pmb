@@ -3,6 +3,20 @@
 
 
 function mfassi_gxotp () {
+  while [ "$#" -ge 1 ]; do
+    case "$1" in
+      tabs=[0-9]* ) mfassi_gxotp__split_short_opt_tabs "${1#*=}" || return $?;;
+      [a-z]*=* ) CFG["gxotp_${1%%=*}"]="${1#*=}";;
+      * ) echo E: $FUNCNAME: "Unsupported option: $1"; return 3;;
+    esac
+    shift
+  done
+
+  local -A TABS_AFTER=()
+  local KEY= VAL=
+  for KEY in user pswd otp ; do
+    TABS_AFTER[$KEY]="$(str_repeat "${CFG[gxotp_tabs_after_$KEY]:-1}" $'\t')"
+  done
   local GX_RV=
   local GX_BTN='
     user _tab pswd:5,
@@ -33,10 +47,9 @@ function mfassi_gxotp () {
       )
     GX_RV="$?"
     case "$GX_RV" in
-      5 ) XDO_TYPE="$L_USER"$'\t'"${LOGIN[pswd]}"$'\t';;
-      6 ) XDO_TYPE="$L_USER"$'\t';;
-      7 ) XDO_TYPE="${LOGIN[pswd]}"$'\t';;
-      8 ) XDO_TYPE="$( $OTP_GEN "$OTP_KEY" )"$'\t';;
+      5 | 6 ) XDO_TYPE+="$L_USER${TABS_AFTER[user]}";;&
+      5 | 7 ) XDO_TYPE+="${LOGIN[pswd]}${TABS_AFTER[pswd]}";;
+      8 ) XDO_TYPE="$( $OTP_GEN "$OTP_KEY" )${TABS_AFTER[otp]}";;
     esac
     if [ -n "$XDO_TYPE" ]; then
       xdotool type "$XDO_TYPE"
@@ -44,6 +57,15 @@ function mfassi_gxotp () {
         echo 'E: Failed gxotp_type_cooldown' >&2)
     fi
     XDO_TYPE=
+  done
+}
+
+
+function mfassi_gxotp__split_short_opt_tabs () {
+  set -- ${1//,/ }
+  local KEY=
+  for KEY in user pswd otp; do
+    CFG[gxotp_tabs_after_"$KEY"]="$1"; shift || true
   done
 }
 
