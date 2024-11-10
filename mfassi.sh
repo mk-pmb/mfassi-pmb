@@ -14,6 +14,7 @@ function mfassi_cli_init () {
     )
   local -A LOGIN=()
   case "$1" in
+    -S ) mfassi_invoked_from_shebang "$@"; return $?;;
     '#!'* ) mfassi_invoked_from_shebang "$@"; return $?;;
   esac
   mfassi_"$@" || return $?
