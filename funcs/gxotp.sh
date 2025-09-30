@@ -36,6 +36,9 @@ function mfassi_gxotp () {
     ${CFG[gxotp_win_opt]}
     )
   local OTP_KEY="${LOGIN[totp_key]}"
+  OTP_KEY="${OTP_KEY// /}"
+  OTP_KEY="${OTP_KEY%%[^A-Za-z2-7]*}"
+  # ^-- Strip off potential comment after base32 characters.
   local OTP_GEN='oathtool --totp --base32 -- '
   local OTP_PIN=
   local XDO_TYPE=
