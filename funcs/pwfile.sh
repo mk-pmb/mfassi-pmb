@@ -41,14 +41,14 @@ function mfassi_pwfile () {
 
 
 function mfassi_pwfile_preparse_keytabval () {
-  sed -rf <(echo '
+  LANG=C sed -rf <(echo '
     s:\s+: :g
     s~\a|\v~~g
     s~^~\r~g
-    ') | sed -rf <(echo '
+    ') | LANG=C sed -rf <(echo '
     s~^\r(-{3,}|={3,})$~<\a:bar>~
     $s~$~\r~
-    ') | tr -d '\n' | tr '\r' '\n' | sed -nrf <(echo '
+    ') | tr -d '\n' | tr '\r' '\n' | LANG=C sed -nrf <(echo '
     s~^([A-Za-z0-9. _-]+): ~\1\t~
     s~^<\a:bar>$~~
     s~^([^\a]+)<\a:bar>$~\a= user\t\1~
@@ -58,7 +58,7 @@ function mfassi_pwfile_preparse_keytabval () {
     s~^([^\a\t]+)(\s)(<\a:maybeDate>)~\3\2\1~
     s~^(<\a:maybeDate>) ~\a= ~
     s~^\a= ([^\t]+)\t~\1\n~p
-    ') | sed -rf <(echo '
+    ') | LANG=C sed -rf <(echo '
     s~[A-Z]+~\L&\E~g
     s~ ~_~g
     s~^(totp_)secret$~\1key~
@@ -68,7 +68,7 @@ function mfassi_pwfile_preparse_keytabval () {
     s~^(user)_?name$~\1~
     s~^un$~user~
     n
-    ') | sed -re 'N;s~\n~\t~'
+    ') | LANG=C sed -re 'N;s~\n~\t~'
 }
 
 
