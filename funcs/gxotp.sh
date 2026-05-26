@@ -32,6 +32,7 @@ function mfassi_gxotp () {
     ${CFG[icon_pswd]}:7,
     $([ -z "$OTP_KEY" ] || echo "${CFG[icon_numcode]}:8,")
     $([ -z "$OTP_KEY" ] || echo GTK_STOCK_REFRESH:0,)
+    $(mfassi_fmt_extra_gxbuttons)
     GTK_STOCK_QUIT:1"
   GX_BTN="${GX_BTN//$'\n    '/}"
   local L_USER="${LOGIN[user]}"
@@ -51,6 +52,16 @@ function mfassi_gxotp () {
       [ -z "$OTP_PIN" ] || echo "OTP: $OTP_PIN"
       )
     GX_RV="$?"
+    VAL="${LOGIN[gxbtn:$GX_RV]}"
+    if [ -n "$VAL" ]; then
+      VAL="${VAL#*,}"
+      case "$VAL" in
+        '' ) ;;
+        'weblink fx://type?'* ) XDO_TYPE="${VAL#*'?'}";;
+        'weblink '* ) xdg-open "${VAL#* }"; continue;;
+        * ) echo E: "Unsupported custom button action: '$VAL'" >&2; return 4;;
+      esac
+    fi
     case "$GX_RV" in
       5 | 6 ) XDO_TYPE+="$L_USER${TABS_AFTER[user]}";;&
       5 | 7 ) XDO_TYPE+="${LOGIN[pswd]}${TABS_AFTER[pswd]}";;
@@ -72,6 +83,18 @@ function mfassi_gxotp__split_short_opt_tabs () {
   for KEY in user pswd otp; do
     CFG[gxotp_tabs_after_"$KEY"]="$1"; shift || true
   done
+}
+
+
+function mfassi_fmt_extra_gxbuttons () {
+  local KEY= VAL= NUM= URL=
+  for KEY in "${!LOGIN[@]}"; do
+    [[ "$KEY" == gxbtn:[0-9]* ]] || continue
+    VAL="${LOGIN[$KEY]}"
+    KEY="${KEY#*:}"
+    VAL="${VAL%%,*}"
+    echo "$KEY"$'\t'"$VAL:$KEY"
+  done | sort --general-numeric-sort | cut -sf 2- | tr '\n' ,
 }
 
 

@@ -31,6 +31,8 @@ function mfassi_pwfile () {
   [ -n "$SRC_TEXT" ] || return 4$(
     echo "E: Found no credentials for user '${WANT_USER:-<any>}'" >&2)
 
+  SRC_TEXT+=$'\n'"$(mfassi_pwfile_read_extra_gxbuttons <"$SRC_ABS")"
+
   LOGIN=()
   if [ -z "$NEXT_TASK" ]; then echo "$SRC_TEXT"; return 0; fi
   local SRC_TEXT="$( mfassi_keytabval_to_bash_dict <<<"$SRC_TEXT" )"
@@ -69,6 +71,19 @@ function mfassi_pwfile_preparse_keytabval () {
     s~^un$~user~
     n
     ') | LANG=C sed -re 'N;s~\n~\t~'
+}
+
+
+function mfassi_pwfile_read_extra_gxbuttons () {
+  LANG=C sed -nrf <(echo '
+    s~^ *\* \[([ -Z^-\xFF]*)\]\(([a-z]+:[!-&*-;=?-~]+)\)~\1\rweblink \2~p
+    ') | nl -ba -v 20 | tr '\r' '\n' | LANG=C sed -rf <(echo '
+      s~^\s*~gxbtn:~
+
+      # remove commas only from button titles,
+      # then merge button action line verbatim:
+      s~,~~g; N; s~\n~,~
+      ')
 }
 
 
