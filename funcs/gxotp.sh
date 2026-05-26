@@ -17,14 +17,22 @@ function mfassi_gxotp () {
   for KEY in user pswd otp ; do
     TABS_AFTER[$KEY]="$(str_repeat "${CFG[gxotp_tabs_after_$KEY]:-1}" $'\t')"
   done
+
+  local OTP_KEY="${LOGIN[totp_key]}"
+  OTP_KEY="${OTP_KEY// /}"
+  OTP_KEY="${OTP_KEY%%[^A-Za-z2-7]*}"
+  # ^-- Strip off potential comment after base32 characters.
+  local OTP_GEN='oathtool --totp --base32 -- '
+  local OTP_PIN=
+
   local GX_RV=
-  local GX_BTN='
-    user _tab pswd:5,
-    _user:6,
-    _pswd:7,
-    T_OTP:8,
-    GTK_STOCK_REFRESH:0,
-    GTK_STOCK_CANCEL:1'
+  local GX_BTN="
+    ${CFG[icon_user]}${CFG[icon_tab_key]}${CFG[icon_pswd]}:5,
+    ${CFG[icon_user]}:6,
+    ${CFG[icon_pswd]}:7,
+    $([ -z "$OTP_KEY" ] || echo "${CFG[icon_numcode]}:8,")
+    $([ -z "$OTP_KEY" ] || echo GTK_STOCK_REFRESH:0,)
+    GTK_STOCK_QUIT:1"
   GX_BTN="${GX_BTN//$'\n    '/}"
   local L_USER="${LOGIN[user]}"
   [ -z "${LOGIN[user_prefix]%¬}" ] || L_USER="${LOGIN[user_prefix]}$L_USER"
@@ -35,18 +43,12 @@ function mfassi_gxotp () {
     -title "mfassi: $L_USER"
     ${CFG[gxotp_win_opt]}
     )
-  local OTP_KEY="${LOGIN[totp_key]}"
-  OTP_KEY="${OTP_KEY// /}"
-  OTP_KEY="${OTP_KEY%%[^A-Za-z2-7]*}"
-  # ^-- Strip off potential comment after base32 characters.
-  local OTP_GEN='oathtool --totp --base32 -- '
-  local OTP_PIN=
   local XDO_TYPE=
   while [ "$GX_RV" != 1 ]; do
     [ -z "$OTP_KEY" ] || OTP_PIN="$( $OTP_GEN "$OTP_KEY" )"
     "${GX_MSG[@]}" -file <(
       echo "user: $L_USER"
-      echo "OTP: ${OTP_PIN:-(found no key)}"
+      [ -z "$OTP_PIN" ] || echo "OTP: $OTP_PIN"
       )
     GX_RV="$?"
     case "$GX_RV" in

@@ -6,13 +6,8 @@ function mfassi_cli_init () {
   export LANG{,UAGE}=en_US.UTF-8  # make error messages search engine-friendly
   local SELFPATH="$(readlink -m -- "$BASH_SOURCE"/..)"
   # cd -- "$SELFPATH" || return $?
+  local -A CFG=() LOGIN=()
   source_these_libs "$SELFPATH"/funcs/*.sh || return $?
-
-  local -A CFG=(
-    [gxotp_win_opt]='-ontop -nofocus' # -nearmouse -sticky
-    [gxotp_type_cooldown]='1s' # how to wait after faking input
-    )
-  local -A LOGIN=()
   case "$1" in
     -S ) mfassi_invoked_from_shebang "$@"; return $?;;
     '#!'* ) mfassi_invoked_from_shebang "$@"; return $?;;
